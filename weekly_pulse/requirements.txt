@@ -1,0 +1,15 @@
+google-play-scraper
+pydantic
+groq
+umap-learn
+hdbscan
+scikit-learn
+pandas
+sentence-transformers
+mcp
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+emoji
+langdetect
+python-dotenv
