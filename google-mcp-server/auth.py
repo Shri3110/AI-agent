@@ -18,10 +18,14 @@ def get_credentials():
     
     # Auto-inject from Railway environment variables if files are missing
     if not os.path.exists(TOKEN_PATH) and "GOOGLE_TOKEN_JSON" in os.environ:
+        if os.path.dirname(TOKEN_PATH):
+            os.makedirs(os.path.dirname(TOKEN_PATH), exist_ok=True)
         with open(TOKEN_PATH, "w") as f:
             f.write(os.environ["GOOGLE_TOKEN_JSON"])
             
     if not os.path.exists(CREDENTIALS_PATH) and "GOOGLE_CREDENTIALS_JSON" in os.environ:
+        if os.path.dirname(CREDENTIALS_PATH):
+            os.makedirs(os.path.dirname(CREDENTIALS_PATH), exist_ok=True)
         with open(CREDENTIALS_PATH, "w") as f:
             f.write(os.environ["GOOGLE_CREDENTIALS_JSON"])
 
