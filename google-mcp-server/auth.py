@@ -14,6 +14,17 @@ CREDENTIALS_PATH = os.environ.get("CREDENTIALS_PATH", "credentials.json")
 
 def get_credentials():
     """Gets valid user credentials from storage or initiates OAuth2 flow."""
+    import json
+    
+    # Auto-inject from Railway environment variables if files are missing
+    if not os.path.exists(TOKEN_PATH) and "GOOGLE_TOKEN_JSON" in os.environ:
+        with open(TOKEN_PATH, "w") as f:
+            f.write(os.environ["GOOGLE_TOKEN_JSON"])
+            
+    if not os.path.exists(CREDENTIALS_PATH) and "GOOGLE_CREDENTIALS_JSON" in os.environ:
+        with open(CREDENTIALS_PATH, "w") as f:
+            f.write(os.environ["GOOGLE_CREDENTIALS_JSON"])
+
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
