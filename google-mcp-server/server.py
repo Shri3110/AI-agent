@@ -9,7 +9,7 @@ from gmail_tool import create_email_draft
 
 app = FastAPI(title="Google MCP Server")
 
-API_KEY = os.environ.get("API_KEY")
+API_KEY = os.environ.get("API_KEY") or os.environ.get("MCP_API_KEY") or os.environ.get("api_key")
 
 class DocRequest(BaseModel):
     doc_id: str
