@@ -35,6 +35,8 @@ def create_email_draft(to_email: str, subject: str, body: str) -> dict:
             "draftId": draft["id"]
         }
 
-    except HttpError as error:
-        logger.error(f"An error occurred: {error}")
-        return {"status": "error", "message": str(error)}
+    except Exception as error:
+        import traceback
+        error_msg = traceback.format_exc()
+        logger.error(f"An error occurred: {error_msg}")
+        return {"status": "error", "message": error_msg}

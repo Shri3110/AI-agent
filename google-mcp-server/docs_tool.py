@@ -40,6 +40,8 @@ def append_to_doc(doc_id: str, content: str) -> dict:
             "replies": result.get("replies")
         }
 
-    except HttpError as error:
-        logger.error(f"An error occurred: {error}")
-        return {"status": "error", "message": str(error)}
+    except Exception as error:
+        import traceback
+        error_msg = traceback.format_exc()
+        logger.error(f"An error occurred: {error_msg}")
+        return {"status": "error", "message": error_msg}
