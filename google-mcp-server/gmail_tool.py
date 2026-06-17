@@ -11,8 +11,8 @@ def create_email_draft(to_email: str, subject: str, body: str) -> dict:
     """
     Creates an email draft in Gmail.
     """
-    creds = get_credentials()
     try:
+        creds = get_credentials()
         service = build("gmail", "v1", credentials=creds)
 
         message = EmailMessage()

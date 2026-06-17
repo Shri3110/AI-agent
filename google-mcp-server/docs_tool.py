@@ -9,8 +9,8 @@ def append_to_doc(doc_id: str, content: str) -> dict:
     """
     Appends text to the end of a Google Document.
     """
-    creds = get_credentials()
     try:
+        creds = get_credentials()
         service = build("docs", "v1", credentials=creds)
 
         # The request to insert text at the end of the document.
