@@ -16,18 +16,29 @@ def get_credentials():
     """Gets valid user credentials from storage or initiates OAuth2 flow."""
     import json
     
-    # Auto-inject from Railway environment variables if files are missing
-    if not os.path.exists(TOKEN_PATH) and "GOOGLE_TOKEN_JSON" in os.environ:
+    google_token = os.environ.get("GOOGLE_TOKEN_JSON") or os.environ.get("google_token_json") or os.environ.get("TOKEN_JSON")
+    
+    if not os.path.exists(TOKEN_PATH) and not google_token:
+        if "RAILWAY_PROJECT_ID" in os.environ or "RAILWAY_ENVIRONMENT" in os.environ or "RAILWAY_ENVIRONMENT_ID" in os.environ:
+            raise Exception(f"GOOGLE_TOKEN_JSON is missing! Available env vars are: {[k for k in os.environ.keys() if 'API' in k or 'TOKEN' in k or 'CRED' in k or 'GOOGLE' in k]}")
+            
+    if not os.path.exists(TOKEN_PATH) and google_token:
         if os.path.dirname(TOKEN_PATH):
             os.makedirs(os.path.dirname(TOKEN_PATH), exist_ok=True)
         with open(TOKEN_PATH, "w") as f:
-            f.write(os.environ["GOOGLE_TOKEN_JSON"])
+            f.write(google_token)
             
-    if not os.path.exists(CREDENTIALS_PATH) and "GOOGLE_CREDENTIALS_JSON" in os.environ:
+    google_creds = os.environ.get("GOOGLE_CREDENTIALS_JSON") or os.environ.get("google_credentials_json") or os.environ.get("CREDENTIALS_JSON")
+    
+    if not os.path.exists(CREDENTIALS_PATH) and not google_creds:
+        if "RAILWAY_PROJECT_ID" in os.environ or "RAILWAY_ENVIRONMENT" in os.environ or "RAILWAY_ENVIRONMENT_ID" in os.environ:
+            raise Exception(f"GOOGLE_CREDENTIALS_JSON is missing! Available env vars are: {[k for k in os.environ.keys() if 'API' in k or 'TOKEN' in k or 'CRED' in k or 'GOOGLE' in k]}")
+            
+    if not os.path.exists(CREDENTIALS_PATH) and google_creds:
         if os.path.dirname(CREDENTIALS_PATH):
             os.makedirs(os.path.dirname(CREDENTIALS_PATH), exist_ok=True)
         with open(CREDENTIALS_PATH, "w") as f:
-            f.write(os.environ["GOOGLE_CREDENTIALS_JSON"])
+            f.write(google_creds)
 
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
