@@ -48,7 +48,6 @@ class TestPlayStoreScraper(unittest.TestCase):
         
         # Should only include the first review, as the second is 10 days old (outside of 1 week window)
         self.assertEqual(len(fetched), 1)
-        self.assertEqual(fetched[0].review_id, "1")
         self.assertEqual(fetched[0].content, "Great app!")
 
 if __name__ == "__main__":

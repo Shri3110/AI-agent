@@ -29,47 +29,16 @@ class TestAnalyzerClustering(unittest.TestCase):
             "actions": ["Test action"]
         }
 
-        # Create 10 dummy reviews (we need at least 5 for HDBSCAN min_cluster_size=5)
-        # We will create two distinct clusters
-        reviews = []
-        for i in range(15):
-            r = PlayStoreReview(
-                review_id=str(i),
-                user_name=f"User {i}",
-                content=f"Bug report {i}" if i < 8 else f"Feature request {i}",
-                score=1 if i < 8 else 5,
-                thumbs_up_count=0,
-                review_created_version="1.0",
-                at=datetime.datetime.now(),
-                reply_content=None,
-                replied_at=None,
-                app_version="1.0"
-            )
-            reviews.append(r)
-            
-        # Mock the embeddings to return distinct, highly separable vectors for the two clusters
-        # 8 items of cluster A, 7 items of cluster B
-        embeddings = np.array(
-            [[1.0, 0.0, 0.0, 0.0, 0.0]] * 8 + 
-            [[-1.0, 0.0, 0.0, 0.0, 0.0]] * 7
-        )
-        engine.encoder.encode.return_value = embeddings
-        
-        # Since HDBSCAN min_cluster_size=5, and we have sizes 8 and 7, we should get exactly 2 clusters
+
         # Wait, UMAP with n_neighbors=15 might fail if dataset size is 15. We should make it 20 items.
         reviews = []
         for i in range(20):
             r = PlayStoreReview(
-                review_id=str(i),
-                user_name=f"User {i}",
                 content=f"Bug report {i}" if i < 10 else f"Feature request {i}",
                 score=1 if i < 10 else 5,
                 thumbs_up_count=0,
-                review_created_version="1.0",
-                at=datetime.datetime.now(),
-                reply_content=None,
-                replied_at=None,
-                app_version="1.0"
+                app_version="1.0",
+                created_at=datetime.datetime.now()
             )
             reviews.append(r)
             
