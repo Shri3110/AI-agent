@@ -1,0 +1,24 @@
+{
+  "week": "2026-W25",
+  "run_date": "2026-06-17T11:00:00.000000",
+  "analysis": {
+    "themes": [
+      "App performance & bugs - Lag during trading",
+      "Customer support friction",
+      "Feature Request - Dark Mode UI"
+    ],
+    "quotes": [
+      "The app freezes often right when I try to place an order.",
+      "Takes forever to load the portfolio screen.",
+      "Support takes days to reply. Horrible experience.",
+      "Bot is useless, I want to talk to a human.",
+      "Please add a dark mode, the white screen hurts my eyes at night.",
+      "A dark theme would make charts so much easier to read."
+    ],
+    "actions": [
+      "Stabilise peak-time performance in order execution flow.",
+      "Improve support SLA and add more human agents.",
+      "Prioritize shipping a system-wide dark mode toggle."
+    ]
+  }
+}

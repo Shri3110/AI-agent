@@ -105,20 +105,81 @@ def main():
         analyzer = AnalysisEngine()
         analysis_data = analyzer.process(reviews)
     
+    # Save analysis data for the React frontend
+    frontend_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "frontend", "public", "data")
+    os.makedirs(frontend_data_dir, exist_ok=True)
+    frontend_data_path = os.path.join(frontend_data_dir, "latest_analysis.json")
+    
+    # We add the week label to the analysis data before saving
+    frontend_payload = {
+        "week": target_iso_week,
+        "run_date": datetime.datetime.now().isoformat(),
+        "analysis": analysis_data
+    }
+    with open(frontend_data_path, "w", encoding="utf-8") as f:
+        json.dump(frontend_payload, f, indent=2)
+    logger.info(f"Saved analysis data to {frontend_data_path} for React dashboard")
+    
     # Phase 4: Rendering
     renderer = PulseRenderer()
     doc_content = renderer.render_doc_content(target_iso_week, analysis_data)
     
-    # Phase 4/3: Delivery via MCP Servers
-    logger.info("Sending payload to Google Docs MCP Server (Mocked)...")
-    mock_doc_anchor = f"https://docs.google.com/document/d/mock/edit#heading={target_iso_week}"
+    # Phase 3/4: Delivery via Remote MCP Server
+    MCP_BASE_URL = os.environ.get("MCP_BASE_URL", "https://ai-agent-production-e36b.up.railway.app")
+    MCP_API_KEY = os.environ.get("MCP_API_KEY", "")
+    TARGET_DOC_ID = os.environ.get("TARGET_DOC_ID", "your_google_doc_id_here")
+    STAKEHOLDER_EMAIL = os.environ.get("STAKEHOLDER_EMAIL", "stakeholders@example.com")
     
-    email_html = renderer.render_email_teaser(target_iso_week, analysis_data, mock_doc_anchor)
-    logger.info("Sending payload to Gmail MCP Server (Mocked)...")
-    mock_email_id = f"msg_{target_iso_week}_draft"
+    def call_mcp(endpoint: str, payload: dict):
+        import urllib.request
+        import urllib.error
+        url = f"{MCP_BASE_URL}/{endpoint}"
+        headers = {"Content-Type": "application/json"}
+        if MCP_API_KEY:
+            headers["x-api-key"] = MCP_API_KEY
+        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read().decode('utf-8'))
+        except urllib.error.HTTPError as e:
+            logger.error(f"MCP Server error {e.code}: {e.read().decode('utf-8')}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to connect to MCP Server: {e}")
+            raise
+
+    logger.info(f"Sending payload to Google Docs via Remote MCP Server at {MCP_BASE_URL}...")
+    doc_payload = {
+        "doc_id": TARGET_DOC_ID,
+        "content": doc_content
+    }
+    
+    doc_resp = call_mcp("append_to_doc", doc_payload)
+    if doc_resp.get("status") != "success":
+        logger.error(f"Failed to append to doc: {doc_resp}")
+        return
+        
+    doc_anchor = f"https://docs.google.com/document/d/{TARGET_DOC_ID}/edit"
+    logger.info("Appended to doc successfully.")
+    
+    email_html = renderer.render_email_teaser(target_iso_week, analysis_data, doc_anchor)
+    logger.info("Sending payload to Gmail via Remote MCP Server...")
+    email_payload = {
+        "to_email": STAKEHOLDER_EMAIL,
+        "subject": f"Weekly Review Pulse - Groww ({target_iso_week})",
+        "body": email_html
+    }
+    
+    email_resp = call_mcp("create_email_draft", email_payload)
+    if email_resp.get("status") != "success":
+        logger.error(f"Failed to create email draft: {email_resp}")
+        return
+        
+    email_id = email_resp.get("draftId", f"msg_{target_iso_week}_draft")
+    logger.info(f"Email draft created successfully. Draft ID: {email_id}")
     
     # Audit Logging
-    log_run(conn, target_iso_week, mock_doc_anchor, mock_email_id)
+    log_run(conn, target_iso_week, doc_anchor, email_id)
     logger.info("Pipeline completed successfully.")
 
 if __name__ == "__main__":
